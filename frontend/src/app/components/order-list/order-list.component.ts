@@ -61,8 +61,8 @@ import { WorkOrder, OrderStatus, OrderStatusLabels } from '../../models/work-ord
               <td *ngIf="!authService.isCustomer()">{{ order.customerName }}</td>
               <td>{{ order.technicianName || '-' }}</td>
               <td>
-                <span class="badge status-{{ order.status?.toLowerCase() }}">
-                  {{ OrderStatusLabels[order.status as OrderStatus] || order.status }}
+                <span class="badge status-{{ getStatusClass(order.status) }}">
+                  {{ getStatusLabel(order.status) }}
                 </span>
               </td>
               <td>{{ order.createdAt | date:'yyyy-MM-dd HH:mm' }}</td>
@@ -115,7 +115,6 @@ export class OrderListComponent implements OnInit {
   displayOrders: WorkOrder[] = [];
   filterStatus: string = '';
   OrderStatus = OrderStatus;
-  OrderStatusLabels = OrderStatusLabels;
 
   constructor(
     public authService: AuthService,
@@ -132,6 +131,16 @@ export class OrderListComponent implements OnInit {
     if (this.authService.isAdmin()) return '管理所有维修保养工单';
     if (this.authService.isTechnician()) return '查看和处理分配给您的任务';
     return '查看您的维修保养预约记录';
+  }
+
+  getStatusLabel(status?: OrderStatus): string {
+    if (!status) return '-';
+    return OrderStatusLabels[status] || status;
+  }
+
+  getStatusClass(status?: OrderStatus): string {
+    if (!status) return 'secondary';
+    return status.toLowerCase().replace('_', '-');
   }
 
   ngOnInit(): void {
