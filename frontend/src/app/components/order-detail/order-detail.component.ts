@@ -23,8 +23,8 @@ import { User } from '../../models/user.model';
       <div class="card">
         <div class="card-header d-flex justify-between align-center">
           <h3 class="card-title">{{ order.title }}</h3>
-          <span class="badge status-{{ order.status?.toLowerCase() }}">
-            {{ OrderStatusLabels[order.status as OrderStatus] }}
+          <span class="badge status-{{ getStatusClass(order.status) }}">
+            {{ getStatusLabel(order.status) }}
           </span>
         </div>
         <div class="card-body">
@@ -32,13 +32,13 @@ import { User } from '../../models/user.model';
             <div class="flex-1">
               <div class="detail-row">
                 <span class="detail-label">工单类型</span>
-                <span class="detail-value">{{ OrderTypeLabels[order.orderType as OrderType] }}</span>
+                <span class="detail-value">{{ getOrderTypeLabel(order.orderType) }}</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">优先级</span>
                 <span class="detail-value">
-                  <span class="badge priority-{{ order.priority?.toLowerCase() }}">
-                    {{ PriorityLabels[order.priority as Priority] }}
+                  <span class="badge priority-{{ getPriorityClass(order.priority) }}">
+                    {{ getPriorityLabel(order.priority) }}
                   </span>
                 </span>
               </div>
@@ -125,8 +125,8 @@ import { User } from '../../models/user.model';
               <label class="form-label">选择技师</label>
               <div class="select-wrapper">
                 <select [(ngModel)]="selectedTechnicianId" class="form-control">
-                  <option [value]="null">请选择技师</option>
-                  <option *ngFor="let tech of technicians" [value]="tech.id">
+                  <option [ngValue]="null">请选择技师</option>
+                  <option *ngFor="let tech of technicians" [ngValue]="tech.id">
                     {{ tech.realName }} ({{ tech.phone }})
                   </option>
                 </select>
@@ -189,12 +189,6 @@ export class OrderDetailComponent implements OnInit {
   order!: WorkOrder | null;
   technicians: User[] = [];
   selectedTechnicianId: number | null = null;
-  OrderStatus = OrderStatus;
-  OrderStatusLabels = OrderStatusLabels;
-  OrderType = OrderType;
-  OrderTypeLabels = OrderTypeLabels;
-  Priority = Priority;
-  PriorityLabels = PriorityLabels;
 
   constructor(
     private route: ActivatedRoute,
@@ -223,6 +217,31 @@ export class OrderDetailComponent implements OnInit {
     return (this.authService.isCustomer() || this.authService.isAdmin()) && 
            this.order?.status !== OrderStatus.COMPLETED && 
            this.order?.status !== OrderStatus.CANCELLED;
+  }
+
+  getStatusLabel(status?: OrderStatus): string {
+    if (!status) return '-';
+    return OrderStatusLabels[status] || status;
+  }
+
+  getStatusClass(status?: OrderStatus): string {
+    if (!status) return 'secondary';
+    return status.toLowerCase().replace('_', '-');
+  }
+
+  getOrderTypeLabel(type?: OrderType): string {
+    if (!type) return '-';
+    return OrderTypeLabels[type] || type;
+  }
+
+  getPriorityLabel(priority?: Priority): string {
+    if (!priority) return '-';
+    return PriorityLabels[priority] || priority;
+  }
+
+  getPriorityClass(priority?: Priority): string {
+    if (!priority) return 'medium';
+    return priority.toLowerCase();
   }
 
   ngOnInit(): void {
